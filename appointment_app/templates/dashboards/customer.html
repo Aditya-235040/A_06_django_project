@@ -1,0 +1,399 @@
+{% extends "base/base.html" %}
+
+{% block title %}My Bookings - AppointOS{% endblock %}
+
+{% block breadcrumb %}My Appointments{% endblock %}
+
+{% block content %}
+<div x-data="customerDashboard()" class="space-y-12">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950/50 p-8 md:p-12 shadow-glass backdrop-blur-xl">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" alt="Abstract Tech Background" class="w-full h-full object-cover opacity-20" />
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent"></div>
+        </div>
+
+        <div class="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-brand-emerald/20 blur-[100px] z-0"></div>
+        <div class="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-brand-teal/20 blur-[100px] z-0"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div class="space-y-4">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-brand-emerald text-xs font-bold uppercase tracking-widest animate-pulse">
+                    <span class="h-2 w-2 rounded-full bg-brand-emerald"></span>
+                    Live Dashboard
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                    Welcome back, <span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-emerald to-brand-teal">{{ user.username }}</span>!
+                </h1>
+                <p class="text-lg text-slate-400 max-w-xl leading-relaxed">
+                    You have <span class="text-white font-semibold">{{ upcoming|length }} upcoming</span> appointments. 
+                    Manage your schedule and book new services with a single click.
+                </p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-4">
+                <button @click="openModal()" class="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-gradient-to-r from-brand-emerald to-brand-teal rounded-2xl hover:scale-105 active:scale-95 shadow-xl shadow-emerald-500/25">
+                    <i data-lucide="calendar-plus" class="mr-2 h-5 w-5 transition-transform group-hover:rotate-12"></i>
+                    Book New Service
+                </button>
+                <a href="https://wa.me/support_number" target="_blank" class="flex items-center gap-3 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] px-6 py-4 rounded-2xl font-bold border border-[#25D366]/20 transition-all">
+                    <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    WhatsApp Support
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Section -->
+    <section x-data="{ show: false }" x-init="setTimeout(() => show = true, 200)" x-show="show" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                    <i data-lucide="calendar" class="h-6 w-6"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Upcoming Appointments</h2>
+                    <p class="text-sm text-slate-500">Your scheduled visits and consultations</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for appt in upcoming %}
+            <div class="glass-panel p-8 rounded-[2rem] border border-white/5 relative group hover:border-brand-emerald/50 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/10">
+                <div class="absolute top-8 right-8">
+                    <span class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        {{ appt.status }}
+                    </span>
+                </div>
+                
+                <div class="flex flex-col h-full">
+                    <div class="mb-8">
+                        <div class="text-brand-emerald font-bold text-xs uppercase tracking-[0.2em] mb-2">{{ appt.service_type }}</div>
+                        <h3 class="text-2xl font-bold text-white group-hover:text-brand-emerald transition">{{ appt.provider.business_name|default:"General Service" }}</h3>
+                    </div>
+
+                    <div class="space-y-4 mb-10">
+                        <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:bg-white/10 transition">
+                            <i data-lucide="clock" class="h-5 w-5 text-brand-emerald"></i>
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Date & Time</p>
+                                <p class="text-sm text-slate-200 font-medium">{{ appt.appointment_date|date:"l, F j" }} at {% if appt.time_slot %}{{ appt.time_slot }}{% else %}{{ appt.appointment_date|date:"H:i" }}{% endif %}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:bg-white/10 transition">
+                            <i data-lucide="user" class="h-5 w-5 text-brand-teal"></i>
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Service Provider</p>
+                                <p class="text-sm text-slate-200 font-medium">{{ appt.staff.name }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto flex items-center gap-3">
+                        <button class="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-white text-sm font-bold hover:bg-white/10 transition active:scale-95">
+                            Reschedule
+                        </button>
+                        <button class="p-4 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition active:scale-95">
+                            <i data-lucide="trash-2" class="h-5 w-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-20 glass-panel rounded-[2.5rem] border border-dashed border-white/10 flex flex-col items-center justify-center text-center">
+                <div class="h-20 w-20 rounded-full bg-slate-900 flex items-center justify-center mb-6 text-slate-700">
+                    <i data-lucide="calendar-x" class="h-10 w-10"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">No upcoming appointments</h3>
+                <p class="text-slate-500 max-w-xs mb-8">Ready to book your next professional service? It only takes a minute.</p>
+                <button @click="openModal()" class="px-8 py-3 rounded-2xl bg-white text-slate-950 font-bold hover:bg-slate-200 transition">
+                    Get Started
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Categories & Services Section -->
+    <section x-data="{ show: false, expandedCat: null }" x-init="setTimeout(() => show = true, 300)" x-show="show" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                <i data-lucide="layers" class="h-6 w-6"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-white">Available Services</h2>
+                <p class="text-sm text-slate-500">Browse categories to find what you need</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {% for cat in categories %}
+            <div class="glass-panel p-6 rounded-3xl border border-white/5 transition-all duration-300 hover:border-emerald-500/30">
+                <div class="flex items-center justify-between cursor-pointer" @click="expandedCat === {{ cat.id }} ? expandedCat = null : expandedCat = {{ cat.id }}">
+                    <h3 class="text-xl font-bold text-white group-hover:text-emerald-400">{{ cat.name }}</h3>
+                    <i data-lucide="chevron-down" class="h-5 w-5 text-slate-400 transition-transform duration-300" :class="expandedCat === {{ cat.id }} ? 'rotate-180 text-emerald-400' : ''"></i>
+                </div>
+                <div x-show="expandedCat === {{ cat.id }}" x-transition.opacity class="mt-4 space-y-2">
+                    {% for sub in cat.subcategories.all %}
+                    <div class="px-4 py-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between group hover:bg-white/10 transition cursor-pointer" @click="openModal(); document.querySelector('input[name=\'service_type\']').value = '{{ sub.name }}'">
+                        <span class="text-sm text-slate-300 font-medium group-hover:text-white">{{ sub.name }}</span>
+                        <i data-lucide="arrow-right" class="h-4 w-4 text-slate-500 group-hover:text-emerald-400 transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                    {% empty %}
+                    <div class="text-xs text-slate-500 italic">No subcategories available.</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-8 text-center text-slate-500 italic border border-dashed border-white/10 rounded-2xl">
+                No service categories available at the moment.
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- History Section -->
+    <section x-data="{ show: false }" x-init="setTimeout(() => show = true, 400)" x-show="show" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="h-12 w-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400 border border-white/5">
+                <i data-lucide="history" class="h-6 w-6"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-white">Booking History</h2>
+                <p class="text-sm text-slate-500">Review your past visits and rebook services</p>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-[2.5rem] border border-white/5 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-white/5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                            <th class="px-8 py-5">Service & Provider</th>
+                            <th class="px-8 py-5">Date</th>
+                            <th class="px-8 py-5">Status</th>
+                            <th class="px-8 py-5 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for appt in history %}
+                        <tr class="hover:bg-white/5 transition group">
+                            <td class="px-8 py-6">
+                                <div class="text-white font-bold text-base mb-1 group-hover:text-brand-emerald transition">{{ appt.service_type }}</div>
+                                <div class="text-xs text-slate-500 flex items-center gap-1">
+                                    <i data-lucide="store" class="h-3 w-3"></i>
+                                    {{ appt.provider.business_name|default:"General Service" }}
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="text-slate-200 font-medium">{{ appt.appointment_date|date:"M d, Y" }}</div>
+                                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{% if appt.time_slot %}{{ appt.time_slot }}{% else %}{{ appt.appointment_date|date:"H:i" }}{% endif %}</div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest {% if appt.status == 'done' %}bg-sky-500/10 text-sky-400{% else %}bg-slate-500/10 text-slate-400{% endif %}">
+                                    {{ appt.status }}
+                                </span>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <button class="px-4 py-2 rounded-xl bg-brand-emerald/10 text-brand-emerald text-xs font-bold hover:bg-brand-emerald hover:text-white transition active:scale-95">Rebook</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-8 py-12 text-center text-slate-500 italic">No past appointments found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Modal -->
+    <div x-show="showModal" 
+         x-cloak 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 px-4 py-6 backdrop-blur-md">
+        
+        <div @click.away="closeModal()" 
+             x-show="showModal"
+             x-transition:enter="transition ease-out duration-300 translate-y-4"
+             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             class="w-full max-w-xl overflow-hidden rounded-[3rem] border border-white/10 bg-slate-900/95 p-8 md:p-10 shadow-2xl shadow-emerald-500/20">
+            
+            <div class="flex items-start justify-between gap-4 mb-10">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-[10px] font-bold uppercase tracking-widest mb-3" x-text="paymentStep ? 'Payment Required' : 'New Booking'"></div>
+                    <h2 class="text-3xl font-bold text-white tracking-tight" x-text="paymentStep ? 'Scan to Pay' : 'Schedule Service'"></h2>
+                    <p class="text-slate-400 mt-2 text-sm" x-show="!paymentStep">Select your preferred staff and time slot.</p>
+                </div>
+                <button @click="closeModal()" class="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-400 transition hover:bg-white/10 hover:text-white">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+
+            <!-- Payment Step UI -->
+            <div x-show="paymentStep" x-cloak class="mt-6 flex flex-col items-center text-center space-y-6">
+                <div class="bg-white p-4 rounded-3xl inline-block shadow-2xl">
+                    <img :src="qrCodeUrl" alt="UPI QR Code" class="h-48 w-48 object-contain">
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400">Fixed Booking Amount</p>
+                    <p class="text-3xl font-bold text-white mt-1">₹<span x-text="bookingAmount"></span></p>
+                </div>
+                <div class="w-full bg-brand-emerald/10 border border-brand-emerald/20 p-4 rounded-2xl text-sm text-brand-emerald flex items-start gap-3 text-left">
+                    <i data-lucide="info" class="h-5 w-5 shrink-0 mt-0.5"></i>
+                    <p>Scan this QR code using PhonePe, GPay, Paytm, or any UPI app. Once the payment is complete, click the button below to confirm your booking.</p>
+                </div>
+                <div class="w-full pt-4 space-y-3">
+                    <button @click="completePayment()" class="w-full rounded-2xl bg-[#25D366] px-6 py-4 text-sm font-bold text-white shadow-xl shadow-emerald-500/20 transition hover:-translate-y-1 flex justify-center items-center gap-2">
+                        <i data-lucide="check-circle" class="h-5 w-5"></i> I Have Made Payment
+                    </button>
+                    <button @click="paymentStep = false" class="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm font-semibold text-slate-400 hover:text-white transition">Go Back</button>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'add_appointment' %}" class="space-y-6" x-show="!paymentStep" @submit.prevent="handleBookingSubmit($event)">
+                {% csrf_token %}
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Choose Staff</label>
+                        <div class="relative">
+                            <select name="staff" required class="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white focus:border-brand-emerald focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 transition">
+                                <option value="" hidden>Select Provider</option>
+                                {% regroup staffs by provider.business_name as provider_list %}
+                                {% for provider in provider_list %}
+                                    {% if provider.grouper %}
+                                    <optgroup label="{{ provider.grouper }}" class="bg-slate-900 text-brand-emerald font-bold">
+                                    {% else %}
+                                    <optgroup label="Independent Staff" class="bg-slate-900 text-brand-emerald font-bold">
+                                    {% endif %}
+                                        {% for s in provider.list %}
+                                        <option value="{{ s.pk }}" class="bg-slate-900 text-slate-200" data-upi-id="{{ s.provider.upi_id }}" data-amount="{{ s.provider.booking_amount }}" data-business-name="{{ s.provider.business_name|escapejs }}">{{ s.position }} — {{ s.name }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endfor %}
+                            </select>
+                            <i data-lucide="chevron-down" class="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none"></i>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Preferred Date</label>
+                        <input name="appointment_date" type="date" x-model="selectedDate" :min="minDate" required class="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white focus:border-brand-emerald focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 transition" />
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Time Slot</label>
+                    <div class="relative">
+                        <select name="time_slot" required class="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white focus:border-brand-emerald focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 transition">
+                            <option value="" disabled selected class="bg-slate-900 text-slate-400">Select Time Slot</option>
+                            <template x-for="slot in availableTimeSlots()" :key="slot.value">
+                                <option :value="slot.value" class="bg-slate-900 text-slate-200" x-text="slot.label"></option>
+                            </template>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Service Type</label>
+                    <input name="service_type" type="text" required class="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-slate-600 focus:border-brand-emerald focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 transition" placeholder="e.g. Consultation, Haircut, etc." />
+                </div>
+
+                <div class="pt-6 flex flex-col sm:flex-row items-center gap-4">
+                    <button type="button" @click="closeModal()" class="w-full sm:w-auto px-8 py-4 rounded-2xl text-slate-400 font-bold hover:bg-white/5 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="w-full sm:flex-1 py-4 rounded-2xl bg-gradient-to-r from-brand-emerald to-brand-teal text-white font-bold shadow-xl shadow-emerald-500/25 hover:scale-[1.02] active:scale-95 transition-all duration-200">
+                        Confirm Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function customerDashboard() {
+        return {
+            showModal: false,
+            paymentStep: false,
+            qrCodeUrl: '',
+            bookingAmount: '0.00',
+            bookingForm: null,
+            minDate: '',
+            selectedDate: '',
+            init() {
+                this.minDate = this.toLocalDateString(new Date());
+            },
+            toLocalDateString(date) {
+                const localDate = new Date(date);
+                localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+                return localDate.toISOString().slice(0, 10);
+            },
+            availableTimeSlots() {
+                const slots = [];
+                const now = new Date();
+                const today = this.toLocalDateString(now);
+
+                for (let hour = 9; hour <= 18; hour += 1) {
+                    if (this.selectedDate === today && hour <= now.getHours()) {
+                        continue;
+                    }
+
+                    const period = hour >= 12 ? 'PM' : 'AM';
+                    const displayHour = hour % 12 || 12;
+                    const label = `${String(displayHour).padStart(2, '0')}:00 ${period}`;
+                    slots.push({ value: label, label });
+                }
+
+                return slots;
+            },
+            openModal() {
+                this.showModal = true;
+                document.body.style.overflow = 'hidden';
+            },
+            closeModal() {
+                this.showModal = false;
+                document.body.style.overflow = 'auto';
+                setTimeout(() => this.paymentStep = false, 300);
+            },
+            handleBookingSubmit(e) {
+                const form = e.target;
+                const staffSelect = form.querySelector('select[name="staff"]');
+                const selectedOption = staffSelect.options[staffSelect.selectedIndex];
+                
+                const upiId = selectedOption.getAttribute('data-upi-id');
+                const amount = selectedOption.getAttribute('data-amount');
+                const businessName = selectedOption.getAttribute('data-business-name') || 'Provider';
+                
+                if (upiId && amount && parseFloat(amount) > 0) {
+                    this.bookingAmount = amount;
+                    this.qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${upiId}%26pn=${encodeURIComponent(businessName)}%26am=${amount}%26cu=INR`;
+                    this.paymentStep = true;
+                    this.bookingForm = form;
+                } else {
+                    form.submit();
+                }
+            },
+            completePayment() {
+                if (this.bookingForm) {
+                    this.bookingForm.submit();
+                }
+            }
+        };
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,172 @@
+{% extends 'base/base.html' %}
+{% block title %}Dashboard — AppointOS{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Welcome Header -->
+    <section class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-white">Dashboard Overview</h1>
+            <p class="text-slate-400 mt-1">Welcome back, <span class="text-brand-emerald font-semibold">{{ user.username }}</span>. Here's your business at a glance.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'appointments_list' %}" class="inline-flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/10">
+                <i data-lucide="list" class="h-4 w-4"></i>
+                View All
+            </a>
+            <a href="{% url 'appointments_list' %}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-brand-emerald to-brand-teal px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5">
+                <i data-lucide="plus-circle" class="h-4 w-4"></i>
+                New Booking
+            </a>
+        </div>
+    </section>
+
+    <!-- Stats Grid -->
+    <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-3xl glass-panel p-6 border border-white/5 shadow-glass">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                    <i data-lucide="calendar-check" class="h-6 w-6"></i>
+                </div>
+                <span class="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg">Today</span>
+            </div>
+            <p class="text-sm font-medium text-slate-400">Today's Appointments</p>
+            <h3 class="text-2xl font-bold text-white mt-1">{{ stats.today_count }}</h3>
+        </div>
+
+        <div class="rounded-3xl glass-panel p-6 border border-white/5 shadow-glass">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                    <i data-lucide="clock" class="h-6 w-6"></i>
+                </div>
+                <span class="text-xs font-medium text-amber-400 bg-amber-500/10 px-2 py-1 rounded-lg">Action Required</span>
+            </div>
+            <p class="text-sm font-medium text-slate-400">Pending Requests</p>
+            <h3 class="text-2xl font-bold text-white mt-1">{{ stats.pending_count }}</h3>
+        </div>
+
+        <div class="rounded-3xl glass-panel p-6 border border-white/5 shadow-glass">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 rounded-2xl bg-brand-emerald/10 flex items-center justify-center text-brand-emerald">
+                    <i data-lucide="users" class="h-6 w-6"></i>
+                </div>
+            </div>
+            <p class="text-sm font-medium text-slate-400">Active Staff</p>
+            <h3 class="text-2xl font-bold text-white mt-1">{{ stats.total_staff }}</h3>
+        </div>
+
+        <div class="rounded-3xl glass-panel p-6 border border-white/5 shadow-glass">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 rounded-2xl bg-brand-teal/10 flex items-center justify-center text-brand-teal">
+                    <i data-lucide="user-plus" class="h-6 w-6"></i>
+                </div>
+            </div>
+            <p class="text-sm font-medium text-slate-400">Total Customers</p>
+            <h3 class="text-2xl font-bold text-white mt-1">{{ stats.total_customers }}</h3>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Upcoming Table -->
+        <div class="lg:col-span-2 rounded-[2rem] glass-panel border border-white/5 overflow-hidden flex flex-col shadow-glass">
+            <div class="p-6 border-b border-white/5 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-white">Upcoming Today</h2>
+                <div class="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center text-xs text-slate-400 border border-white/10">
+                    {{ appointments|length }}
+                </div>
+            </div>
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-xs uppercase tracking-widest text-slate-500 bg-white/[0.02]">
+                            <th class="px-6 py-4 font-semibold">Customer</th>
+                            <th class="px-6 py-4 font-semibold">Service</th>
+                            <th class="px-6 py-4 font-semibold text-center">Time</th>
+                            <th class="px-6 py-4 font-semibold text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for appt in appointments %}
+                        <tr class="hover:bg-white/[0.02] transition">
+                            <td class="px-6 py-4">
+                                <p class="text-sm font-semibold text-white">{{ appt.customer.name }}</p>
+                                <p class="text-xs text-slate-500">{{ appt.customer.phone }}</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm text-slate-300">{{ appt.service_type }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-sm font-mono text-brand-emerald">{{ appt.appointment_date|date:'H:i' }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                {% if appt.status == 'pending' %}
+                                <span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 text-[10px] font-bold uppercase tracking-wider border border-amber-500/20">Pending</span>
+                                {% elif appt.status == 'confirmed' %}
+                                <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">Confirmed</span>
+                                {% else %}
+                                <span class="px-2.5 py-1 rounded-full bg-slate-500/10 text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-slate-500/20">{{ appt.status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-20 text-center">
+                                <div class="flex flex-col items-center gap-3">
+                                    <div class="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center text-slate-600 mb-2">
+                                        <i data-lucide="calendar-x" class="h-8 w-8"></i>
+                                    </div>
+                                    <p class="text-slate-400 text-sm">No appointments scheduled for today.</p>
+                                    <a href="{% url 'appointments_list' %}" class="text-brand-emerald text-sm font-semibold hover:underline">Book one now →</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Activity/Insights Panel -->
+        <div class="rounded-[2rem] glass-panel border border-white/5 p-6 shadow-glass">
+            <h2 class="text-xl font-bold text-white mb-6">Quick Insights</h2>
+            <div class="space-y-4">
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Success Rate</p>
+                    <div class="flex items-end justify-between">
+                        <h4 class="text-2xl font-bold text-white">94%</h4>
+                        <span class="text-emerald-400 text-xs flex items-center gap-1 font-medium mb-1">
+                            <i data-lucide="trending-up" class="h-3 w-3"></i>
+                            +2.4%
+                        </span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-1 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-brand-emerald h-full w-[94%]"></div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">WhatsApp Response</p>
+                    <div class="flex items-end justify-between">
+                        <h4 class="text-2xl font-bold text-white">12.5m</h4>
+                        <span class="text-slate-500 text-xs font-medium mb-1">Avg. Time</span>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-white">Online Staff</h3>
+                        <span class="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    </div>
+                    <div class="flex -space-x-3">
+                        <div class="h-10 w-10 rounded-full border-2 border-slate-900 bg-brand-emerald flex items-center justify-center text-xs font-bold text-white shadow-lg">JD</div>
+                        <div class="h-10 w-10 rounded-full border-2 border-slate-900 bg-brand-teal flex items-center justify-center text-xs font-bold text-white shadow-lg">SK</div>
+                        <div class="h-10 w-10 rounded-full border-2 border-slate-900 bg-emerald-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">ML</div>
+                        <div class="h-10 w-10 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-xs font-bold text-white shadow-lg">+2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

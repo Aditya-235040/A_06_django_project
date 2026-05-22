@@ -1,0 +1,161 @@
+{% extends 'base/base.html' %}
+{% block title %}Staff Management — AppointOS{% endblock %}
+
+{% block content %}
+<div x-data="staffShell()" class="fade-in space-y-6">
+    <!-- Header Section -->
+    <section class="relative overflow-hidden rounded-[2.5rem] glass-panel p-8 md:p-10 shadow-glass border border-white/5 backdrop-blur-xl">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2670&auto=format&fit=crop" alt="Team collaborating" class="w-full h-full object-cover opacity-10" />
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent"></div>
+        </div>
+
+        <div class="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-brand-teal/20 blur-[100px] z-0"></div>
+        
+        <div class="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+            <div class="space-y-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-brand-teal text-[10px] font-bold uppercase tracking-[0.2em]">
+                    <i data-lucide="users" class="h-3 w-3"></i>
+                    Team
+                </div>
+                <h1 class="text-4xl font-bold text-white tracking-tight">Staff Management</h1>
+                <p class="max-w-2xl text-base text-slate-400">Manage your service providers, their contact details, and their active status within the platform.</p>
+            </div>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div class="relative rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-slate-400 shadow-inner focus-within:border-brand-emerald transition">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2"></i>
+                    <input x-model="search" type="search" placeholder="Search team..." class="w-full bg-transparent pl-10 text-sm placeholder:text-slate-500 focus:outline-none text-white" />
+                </div>
+                <button @click="openAddModal()" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-brand-emerald to-brand-teal px-6 py-3 text-sm font-bold text-white shadow-xl shadow-emerald-500/20 transition hover:scale-105 active:scale-95">
+                    <i data-lucide="user-plus" class="h-5 w-5"></i>
+                    Add Member
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Staff Grid -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for staff in staffs %}
+        <div x-show="matchesSearch('{{ staff.name|escapejs }} {{ staff.position|escapejs }}', search)" class="rounded-[2rem] glass-panel border border-white/5 p-6 shadow-glass hover:border-brand-emerald/30 transition group">
+            <div class="flex flex-col items-center text-center">
+                <div class="h-20 w-20 rounded-3xl bg-slate-800 border border-white/10 flex items-center justify-center text-2xl font-bold text-brand-emerald mb-4 group-hover:scale-110 transition duration-300">
+                    {{ staff.name|slice:":1" }}
+                </div>
+                <h3 class="text-xl font-bold text-white">{{ staff.name }}</h3>
+                <p class="text-sm font-medium text-slate-500 uppercase tracking-widest mt-1">{{ staff.position }}</p>
+                
+                <div class="mt-6 w-full space-y-3">
+                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
+                        <i data-lucide="phone" class="h-4 w-4 text-brand-emerald"></i>
+                        <span class="text-sm text-slate-300 font-medium">{{ staff.phone }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
+                        <i data-lucide="mail" class="h-4 w-4 text-brand-teal"></i>
+                        <span class="text-sm text-slate-300 font-medium truncate">{{ staff.email }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex items-center gap-2 w-full">
+                    <button @click="openEditModal('{{ staff.pk }}', '{{ staff.name|escapejs }}', '{{ staff.phone|escapejs }}', '{{ staff.email|escapejs }}', '{{ staff.position|escapejs }}')" class="flex-1 rounded-xl bg-white/5 border border-white/10 py-2.5 text-xs font-bold text-white uppercase tracking-widest hover:bg-white/10 transition">Edit</button>
+                    <a href="{% url 'delete_staff' staff.pk %}" onclick="return confirm('Remove this staff member?')" class="rounded-xl bg-rose-500/10 border border-rose-500/20 px-3 py-2.5 text-rose-400 hover:bg-rose-500/20 transition">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-20 text-center">
+            <div class="flex flex-col items-center gap-4">
+                <div class="h-20 w-20 rounded-full bg-white/5 flex items-center justify-center text-slate-700">
+                    <i data-lucide="users-2" class="h-10 w-10"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white">No team members yet</h2>
+                <p class="text-slate-500 max-w-sm">Start building your team by adding your first staff member to manage their appointments.</p>
+                <button @click="openAddModal()" class="mt-2 inline-flex items-center gap-2 rounded-2xl bg-brand-emerald px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5">
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Add First Member
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- Modals -->
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div @click.away="closeModal()" class="w-full max-w-lg glass-panel rounded-[2rem] border border-white/10 p-8 shadow-glass animate-in fade-in zoom-in duration-300">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-white" x-text="editMode ? 'Edit Team Member' : 'Add Team Member'"></h2>
+                <button @click="closeModal()" class="p-2 rounded-full hover:bg-white/10 text-slate-400"><i data-lucide="x" class="h-5 w-5"></i></button>
+            </div>
+
+            <form :action="editMode ? '/provider/staff/edit/' + editPk + '/' : '{% url 'add_staff' %}'" method="POST" class="space-y-5">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Full Name</label>
+                        <input type="text" name="name" x-model="formData.name" required class="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder:text-slate-600 focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/20 outline-none transition" placeholder="e.g. John Doe" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Phone</label>
+                            <input type="tel" name="phone" x-model="formData.phone" required class="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder:text-slate-600 focus:border-brand-emerald outline-none transition" placeholder="Phone" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Position</label>
+                            <input type="text" name="position" x-model="formData.position" required class="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder:text-slate-600 focus:border-brand-emerald outline-none transition" placeholder="Title" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Email</label>
+                        <input type="email" name="email" x-model="formData.email" required class="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder:text-slate-600 focus:border-brand-emerald outline-none transition" placeholder="email@example.com" />
+                    </div>
+                </div>
+
+                <div class="pt-6 flex items-center justify-end gap-3">
+                    <button type="button" @click="closeModal()" class="px-6 py-3 rounded-2xl text-sm font-bold text-slate-400 hover:text-white transition">Cancel</button>
+                    <button type="submit" class="px-8 py-3 rounded-2xl bg-gradient-to-r from-brand-emerald to-brand-teal text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5" x-text="editMode ? 'Save Changes' : 'Add Member'"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function staffShell() {
+        return {
+            showModal: false,
+            editMode: false,
+            editPk: null,
+            search: '',
+            formData: {
+                name: '',
+                phone: '',
+                email: '',
+                position: ''
+            },
+            openAddModal() {
+                this.editMode = false;
+                this.formData = { name: '', phone: '', email: '', position: '' };
+                this.showModal = true;
+            },
+            openEditModal(pk, name, phone, email, position) {
+                this.editMode = true;
+                this.editPk = pk;
+                this.formData = { name, phone, email, position };
+                this.showModal = true;
+            },
+            closeModal() {
+                this.showModal = false;
+            },
+            matchesSearch(text, query) {
+                if (!query) return true;
+                return text.toLowerCase().includes(query.toLowerCase());
+            }
+        }
+    }
+</script>
+{% endblock %}

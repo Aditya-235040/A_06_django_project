@@ -1,0 +1,265 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AppointOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-display { font-family: 'Outfit', sans-serif; }
+        .glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body class="h-full bg-slate-950 text-slate-200 antialiased overflow-hidden flex" x-data="loginData()">
+    
+    <!-- LEFT PANEL: Project Showcase (Hidden on small screens) -->
+    <div class="hidden lg:flex lg:w-5/12 xl:w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-slate-900 border-r border-white/5">
+        <!-- Background Accents -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png" alt="Abstract tech" class="w-full h-full object-cover opacity-20 mix-blend-luminosity" />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 backdrop-blur-[2px]"></div>
+        </div>
+        
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/30 rounded-full blur-[100px] z-0"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent z-0 pointer-events-none"></div>
+
+        <!-- Top Logo -->
+        <div class="relative z-10 flex items-center gap-3">
+            <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <i data-lucide="calendar-check" class="text-white h-6 w-6"></i>
+            </div>
+            <span class="text-2xl font-display font-bold text-white tracking-tight">AppointOS</span>
+        </div>
+
+        <!-- Main Copy -->
+        <div class="relative z-10 mt-auto mb-16 max-w-lg">
+            <h1 class="text-5xl font-display font-extrabold text-white leading-[1.1] mb-6">
+                Next-Gen <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Appointment</span> Management.
+            </h1>
+            <p class="text-lg text-slate-400 mb-8 leading-relaxed">
+                Seamlessly connect service providers and customers. Automated WhatsApp notifications, real-time dashboards, and beautiful booking flows all in one platform.
+            </p>
+            
+            <div class="space-y-4">
+                <div class="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm transition hover:bg-white/10">
+                    <div class="bg-emerald-500/20 p-2.5 rounded-lg text-emerald-400"><i data-lucide="message-square" class="h-5 w-5"></i></div>
+                    <div>
+                        <h4 class="text-white font-bold text-sm">WhatsApp Integration</h4>
+                        <p class="text-slate-500 text-xs mt-0.5">Automated reminders & confirmations</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm transition hover:bg-white/10">
+                    <div class="bg-teal-500/20 p-2.5 rounded-lg text-teal-400"><i data-lucide="layout-dashboard" class="h-5 w-5"></i></div>
+                    <div>
+                        <h4 class="text-white font-bold text-sm">Role-based Dashboards</h4>
+                        <p class="text-slate-500 text-xs mt-0.5">Custom panels for Admin, Providers & Customers</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm transition hover:bg-white/10">
+                    <div class="bg-emerald-500/20 p-2.5 rounded-lg text-emerald-400"><i data-lucide="users" class="h-5 w-5"></i></div>
+                    <div>
+                        <h4 class="text-white font-bold text-sm">Service Categorization</h4>
+                        <p class="text-slate-500 text-xs mt-0.5">Grouped services like Salon, Doctor, Technician, etc.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Login Form -->
+    <div class="w-full lg:w-7/12 xl:w-1/2 flex flex-col relative h-full overflow-y-auto">
+        <a href="{% url 'about_us' %}" class="absolute right-6 top-6 z-20 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-white transition hover:border-emerald-500/40 hover:bg-emerald-500/10">
+            <i data-lucide="info" class="h-4 w-4 text-emerald-400"></i>
+            About Us
+        </a>
+
+        <!-- Mobile Background (visible only on small screens) -->
+        <div class="absolute inset-0 z-0 lg:hidden pointer-events-none">
+            <img src="https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png" alt="Abstract" class="w-full h-full object-cover opacity-10" />
+            <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-md"></div>
+        </div>
+
+        <div class="flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 md:px-20 lg:px-24 xl:px-32 relative z-10 min-h-max">
+            
+            <!-- Mobile Logo -->
+            <div class="flex lg:hidden flex-col items-center mb-10 text-center">
+                <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-4">
+                    <i data-lucide="calendar-check" class="text-white h-6 w-6"></i>
+                </div>
+                <h2 class="text-3xl font-display font-bold text-white">AppointOS</h2>
+                <p class="text-slate-400 text-sm mt-1">Select your role to continue</p>
+            </div>
+
+            <!-- Desktop Header -->
+            <div class="hidden lg:block mb-10">
+                <h2 class="text-3xl font-display font-bold text-white">Welcome back</h2>
+                <p class="text-slate-400 text-sm mt-2">Please select your role and enter your details to sign in.</p>
+            </div>
+
+            <div class="w-full max-w-md mx-auto lg:mx-0">
+                <!-- Role Switcher -->
+                <div class="flex p-1.5 bg-slate-900 border border-white/5 rounded-2xl mb-8">
+                    <button @click="role = 'CUSTOMER'" :class="role === 'CUSTOMER' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-200">
+                        CUSTOMER
+                    </button>
+                    <button @click="role = 'PROVIDER'" :class="role === 'PROVIDER' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-200">
+                        PROVIDER
+                    </button>
+                    <button @click="role = 'ADMIN'" :class="role === 'ADMIN' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-200">
+                        ADMIN
+                    </button>
+                </div>
+
+                {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)" x-transition class="p-4 rounded-xl {% if message.tags == 'success' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %} border text-xs font-medium flex items-center gap-3">
+                        <i data-lucide="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" class="h-4 w-4 shrink-0"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- New User Register First Option -->
+                <div class="mb-8 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-emerald-500/40">
+                    <div>
+                        <h3 class="text-white text-sm font-bold flex items-center gap-2">
+                            <i data-lucide="user-plus" class="h-4 w-4 text-emerald-400"></i>
+                            New User?
+                        </h3>
+                        <p class="text-slate-400 text-xs mt-1">Register first to create an account.</p>
+                    </div>
+                    <a href="{% url 'register' %}" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold py-2.5 px-5 rounded-xl transition-colors whitespace-nowrap text-center">
+                        Register Now
+                    </a>
+                </div>
+
+                <form method="POST" action="{% url 'login' %}" class="space-y-5" @submit="handleSubmit">
+                    {% csrf_token %}
+                    <input type="hidden" name="role_type" :value="role">
+
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                        <div class="relative group">
+                            <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors"></i>
+                            <input type="text" name="username" x-model="username" autocomplete="username" readonly onfocus="this.removeAttribute('readonly');" required class="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-600" placeholder="Enter your username">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
+                        <div class="relative group">
+                            <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors"></i>
+                            <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" autocomplete="current-password" readonly onfocus="this.removeAttribute('readonly');" required class="w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-600" placeholder="••••••••">
+                            <button type="button" @click="showPassword = !showPassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors focus:outline-none">
+                                <i data-lucide="eye" x-show="!showPassword" class="h-5 w-5"></i>
+                                <i data-lucide="eye-off" x-show="showPassword" x-cloak class="h-5 w-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between px-1 py-2">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <div class="relative flex items-center justify-center">
+                                <input type="checkbox" name="remember_me" x-model="rememberMe" class="peer appearance-none w-4 h-4 border border-white/20 rounded bg-slate-900 checked:bg-emerald-500 checked:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all cursor-pointer">
+                                <i data-lucide="check" class="absolute h-3 w-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
+                            </div>
+                            <span class="text-xs text-slate-400 font-medium group-hover:text-slate-300 transition-colors">Remember me</span>
+                        </label>
+                        <a href="{% url 'forgot_password' %}" class="text-xs text-emerald-400 font-bold hover:text-emerald-300 transition-colors">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-4 rounded-2xl shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 mt-2">
+                        Sign In to <span x-text="role.charAt(0) + role.slice(1).toLowerCase()"></span> Panel
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer securely placed at the bottom of the scrolling content -->
+        <div class="mt-auto py-8 px-6 relative z-10 w-full flex justify-center border-t border-white/5 bg-slate-950/50">
+            <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-sm text-slate-400">
+                <span class="text-[10px] uppercase tracking-[0.2em] text-emerald-500 font-bold sm:border-r border-white/10 sm:pr-6">Team A06</span>
+                
+                <div class="flex flex-wrap justify-center items-center gap-3">
+                    <!-- Shreya Kumari -->
+                    <div class="flex items-center gap-2 bg-white/5 pl-1.5 pr-3 py-1.5 rounded-full border border-white/5 group hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-all duration-300">
+                        <img src="{% static 'images/shreyaa.jpeg' %}" alt="Shreya" class="h-6 w-6 rounded-full object-cover border border-emerald-500/50" />
+                        <div class="flex flex-col">
+                            <span class="text-white font-bold text-[9px] leading-none">Shreya Kumari</span>
+                            <span class="text-slate-500 text-[8px]">Roll: 235005</span>
+                        </div>
+                    </div>
+                    <!-- Aditya Gunjan -->
+                    <div class="flex items-center gap-2 bg-white/5 pl-1.5 pr-3 py-1.5 rounded-full border border-white/5 group hover:border-teal-500/50 hover:bg-teal-500/10 transition-all duration-300">
+                        <img src="{% static 'images/Aditya.jpeg' %}" alt="Aditya" class="h-6 w-6 rounded-full object-cover border border-teal-500/50" />
+                        <div class="flex flex-col">
+                            <span class="text-white font-bold text-[9px] leading-none">Aditya Gunjan</span>
+                            <span class="text-slate-500 text-[8px]">Roll: 235040</span>
+                        </div>
+                    </div>
+                    <!-- Sudhanshu -->
+                    <div class="flex items-center gap-2 bg-white/5 pl-1.5 pr-3 py-1.5 rounded-full border border-white/5 group hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-all duration-300">
+                        <img src="{% static 'images/Sudhanshu.jpeg' %}" alt="Sudhanshu" class="h-6 w-6 rounded-full object-cover border border-emerald-500/50" />
+                        <div class="flex flex-col">
+                            <span class="text-white font-bold text-[9px] leading-none">Sudhanshu</span>
+                            <span class="text-slate-500 text-[8px]">Roll: 235026</span>
+                        </div>
+                    </div>
+                    <!-- Himanshu Kumar -->
+                    <div class="flex items-center gap-2 bg-white/5 pl-1.5 pr-3 py-1.5 rounded-full border border-white/5 group hover:border-amber-500/50 hover:bg-amber-500/10 transition-all duration-300">
+                        <img src="{% static 'images/himanshu.jpeg' %}" alt="Himanshu" class="h-6 w-6 rounded-full object-cover border border-amber-500/50" />
+                        <div class="flex flex-col">
+                            <span class="text-white font-bold text-[9px] leading-none">Himanshu Kumar</span>
+                            <span class="text-slate-500 text-[8px]">Roll: 235024</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loginData() {
+            return {
+                role: '{{ submitted_role|default:"CUSTOMER" }}',
+                showPassword: false,
+                username: '',
+                password: '',
+                rememberMe: false,
+
+                init() {
+                    // Initialize role from URL parameter if available
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const urlRole = urlParams.get('role');
+                    if (urlRole && ['CUSTOMER', 'PROVIDER', 'ADMIN'].includes(urlRole.toUpperCase())) {
+                        this.role = urlRole.toUpperCase();
+                    }
+                },
+
+                handleSubmit() {
+                    // Browser natively handles remembering password and username
+                }
+            }
+        }
+        lucide.createIcons();
+    </script>
+</body>
+</html>

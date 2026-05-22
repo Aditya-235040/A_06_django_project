@@ -1,0 +1,346 @@
+{% extends "base/base.html" %}
+
+{% block title %}Provider Dashboard - AppointOS{% endblock %}
+
+{% block breadcrumb %}{{ profile.business_name }} Dashboard{% endblock %}
+
+{% block content %}
+<div x-data="appointmentsShell()" class="fade-in space-y-10">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950/50 p-8 md:p-12 shadow-glass backdrop-blur-xl">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2670&auto=format&fit=crop" alt="Team meeting background" class="w-full h-full object-cover opacity-10" />
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent"></div>
+        </div>
+
+        <div class="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-brand-emerald/20 blur-[100px] z-0"></div>
+        <div class="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-brand-teal/20 blur-[100px] z-0"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div class="space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest animate-pulse">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    WhatsApp Gateway Active
+                </div>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                    {{ profile.business_name }}
+                </h1>
+                <p class="text-lg text-slate-400 max-w-xl leading-relaxed">
+                    Manage your team, track appointments, and grow your business with the ultimate booking OS.
+                </p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-4">
+                <a href="https://wa.me/{{ profile.phone }}" target="_blank" class="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-[#25D366] rounded-2xl hover:scale-105 active:scale-95 shadow-xl shadow-emerald-500/20">
+                    <svg class="mr-2 h-6 w-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    Connect WhatsApp
+                </a>
+                <a href="{% url 'appointments_list' %}" class="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl hover:bg-white/20 active:scale-95">
+                    <i data-lucide="calendar" class="mr-2 h-5 w-5"></i>
+                    Schedule View
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="hover-lift glass-panel p-8 rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-emerald/10 to-transparent">
+            <div class="h-12 w-12 rounded-2xl bg-brand-emerald/20 flex items-center justify-center text-brand-emerald mb-6">
+                <i data-lucide="clock" class="h-6 w-6"></i>
+            </div>
+            <h3 class="text-slate-400 text-sm font-bold uppercase tracking-widest mb-2">Pending Requests</h3>
+            <p class="text-4xl font-bold text-white">{{ stats.pending }}</p>
+            <div class="mt-6 flex items-center gap-2 text-amber-400 text-xs font-bold bg-amber-400/10 px-3 py-1 rounded-full w-fit">
+                <i data-lucide="alert-circle" class="h-3 w-3"></i>
+                <span>Immediate Action</span>
+            </div>
+        </div>
+
+        <div class="hover-lift glass-panel p-8 rounded-[2rem] border border-white/5 bg-gradient-to-br from-emerald-500/10 to-transparent">
+            <div class="h-12 w-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6">
+                <i data-lucide="check-circle" class="h-6 w-6"></i>
+            </div>
+            <h3 class="text-slate-400 text-sm font-bold uppercase tracking-widest mb-2">Confirmed Today</h3>
+            <p class="text-4xl font-bold text-white">{{ stats.confirmed }}</p>
+            <div class="mt-6 flex items-center gap-2 text-emerald-400 text-xs font-bold bg-emerald-400/10 px-3 py-1 rounded-full w-fit">
+                <i data-lucide="trending-up" class="h-3 w-3"></i>
+                <span>On Track</span>
+            </div>
+        </div>
+
+        <div class="hover-lift glass-panel p-8 rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-teal/10 to-transparent">
+            <div class="h-12 w-12 rounded-2xl bg-brand-teal/20 flex items-center justify-center text-brand-teal mb-6">
+                <i data-lucide="users" class="h-6 w-6"></i>
+            </div>
+            <h3 class="text-slate-400 text-sm font-bold uppercase tracking-widest mb-2">Active Staff</h3>
+            <p class="text-4xl font-bold text-white">{{ stats.total_staff }}</p>
+            <a href="{% url 'staff_list' %}" class="mt-6 flex items-center gap-2 text-brand-teal text-xs font-bold hover:underline">
+                Manage Team <i data-lucide="arrow-right" class="h-3 w-3"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div class="lg:col-span-2">
+            <div class="glass-panel rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
+                <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-white/5">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Recent Appointments</h2>
+                        <p class="text-xs text-slate-500 mt-1">Latest booking activity for your business</p>
+                    </div>
+                    <a href="{% url 'appointments_list' %}" class="text-sm text-brand-emerald font-bold hover:underline">View All</a>
+                </div>
+                <div class="p-6 space-y-4">
+                    {% for appt in appointments %}
+                    <div class="group p-5 rounded-[1.5rem] bg-white/5 border border-white/5 flex items-center justify-between hover:bg-white/10 hover:border-white/10 transition-all duration-300">
+                        <div class="flex items-center gap-5">
+                            <div class="h-12 w-12 rounded-2xl bg-slate-800 flex items-center justify-center font-bold text-slate-300 border border-white/5 group-hover:scale-110 transition">
+                                {{ appt.customer.name|slice:":1" }}
+                            </div>
+                            <div>
+                                <div class="font-bold text-white text-base">{{ appt.customer.name }}</div>
+                                <div class="text-xs text-slate-500 font-medium tracking-wide">
+                                    <span class="text-brand-emerald">{{ appt.service_type }}</span> • {{ appt.appointment_date|date:"d M, Y" }} {{ appt.time_slot|default:'' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest
+                                {% if appt.status == 'pending' %}bg-amber-500/10 text-amber-400 border border-amber-500/20
+                                {% elif appt.status == 'accepted' or appt.status == 'confirmed' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
+                                {% elif appt.status == 'rejected' or appt.status == 'cancelled' %}bg-rose-500/10 text-rose-400 border border-rose-500/20
+                                {% elif appt.status == 'rescheduled' %}bg-sky-500/10 text-sky-400 border border-sky-500/20
+                                {% else %}bg-slate-500/10 text-slate-400 border border-slate-500/20{% endif %}">
+                                {{ appt.status }}
+                            </span>
+                            
+                            {% if appt.whatsapp_sent %}
+                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
+                                <i data-lucide="check-circle" class="h-4 w-4"></i>Sent
+                            </span>
+                            {% else %}
+                            <button @click="openWaModal('{{ appt.pk }}', '{{ appt.customer.name|escapejs }}', '{{ appt.service_type|escapejs }}', '{{ appt.appointment_date|date:'Y-m-d H:i' }}', '{{ profile.business_name|default:'Us'|escapejs }}')" class="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-900/95 text-slate-100 transition flex items-center gap-1 text-xs font-bold">
+                                <i data-lucide="message-circle" class="h-4 w-4"></i>Send
+                            </button>
+                            {% endif %}
+                            
+                            <button @click="openEditModal('{{ appt.pk }}', '{{ appt.status }}', '{{ appt.staff.pk }}')" class="p-2 rounded-xl border border-brand-emerald/30 bg-brand-emerald/10 hover:bg-brand-emerald hover:text-white text-brand-emerald transition flex items-center gap-1 text-xs font-bold">
+                                <i data-lucide="edit-2" class="h-4 w-4"></i>Edit
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-16 text-slate-500 italic flex flex-col items-center">
+                        <i data-lucide="calendar-off" class="h-10 w-10 mb-4 opacity-20"></i>
+                        <p>No appointments scheduled yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-8">
+            <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
+                <h2 class="text-lg font-bold text-white mb-6">Quick Actions</h2>
+                <div class="space-y-4">
+                    <a href="{% url 'appointments_list' %}" class="w-full p-5 rounded-2xl bg-brand-emerald text-white font-bold flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-emerald-500/20">
+                        <i data-lucide="plus-circle" class="h-5 w-5"></i>
+                        New Booking
+                    </a>
+                    <a href="{% url 'staff_list' %}" class="w-full p-5 rounded-2xl bg-white/5 border border-white/10 text-white font-bold flex items-center justify-center gap-3 hover:bg-white/10 transition active:scale-95">
+                        <i data-lucide="user-plus" class="h-5 w-5"></i>
+                        Add Team Member
+                    </a>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 bg-slate-900/50">
+                <div class="flex items-center gap-3 mb-6">
+                    <i data-lucide="briefcase" class="h-5 w-5 text-brand-teal"></i>
+                    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Business Profile</h2>
+                </div>
+                <div class="space-y-6">
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Company Name</div>
+                        <div class="text-white font-bold">{{ profile.business_name }}</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Business Address</div>
+                        <div class="text-white text-sm leading-relaxed">{{ profile.address|default:"Location not set" }}</div>
+                    </div>
+                    <button class="w-full text-xs font-bold text-brand-emerald hover:text-brand-teal transition text-center mt-2">Edit Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Edit Appointment Modal (Alpine.js) -->
+<div x-show="editModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm" x-transition.opacity>
+<div @click.outside="closeEditModal()" class="w-full max-w-lg rounded-[2rem] border border-white/10 bg-slate-900 p-8 shadow-2xl shadow-brand-emerald/20" x-show="editModalOpen" x-transition.scale.origin.bottom>
+    <div class="mb-6 flex items-center justify-between">
+    <h3 class="text-2xl font-bold text-white">Update Appointment</h3>
+    <button @click="closeEditModal()" class="rounded-full bg-white/5 p-2 text-slate-400 transition hover:bg-white/10 hover:text-white">
+        <i data-lucide="x" class="h-5 w-5"></i>
+    </button>
+    </div>
+    <form method="POST" :action="`/appointments/update/${editApptId}/`" class="space-y-5">
+    {% csrf_token %}
+    <div class="space-y-4">
+        <label class="block text-sm text-slate-300">
+        <span class="mb-2 block font-semibold text-slate-100">Status</span>
+        <select name="status" x-model="editApptStatus" required class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20">
+            <option value="pending">Pending</option>
+            <option value="accepted">Accepted</option>
+            <option value="rejected">Rejected</option>
+            <option value="rescheduled">Rescheduled</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="done">Done</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+        </label>
+
+        <label class="block text-sm text-slate-300">
+        <span class="mb-2 block font-semibold text-slate-100">Re-assign Staff</span>
+        <select name="staff" x-model="editApptStaff" required class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20">
+            <optgroup label="Your Team">
+                {% for s in staffs %}
+                <option value="{{ s.pk }}">{{ s.position }} — {{ s.name }}</option>
+                {% endfor %}
+            </optgroup>
+        </select>
+        </label>
+    </div>
+    <div class="space-y-4" x-show="editApptStatus === 'rescheduled'" style="display: none;">
+        <label class="block text-sm text-slate-300">
+        <span class="mb-2 block font-semibold text-slate-100">New Date</span>
+        <input name="appointment_date" type="date" :min="minDate" class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20" />
+        </label>
+        <label class="block text-sm text-slate-300">
+        <span class="mb-2 block font-semibold text-slate-100">New Time Slot</span>
+        <select name="time_slot" class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20">
+            <option value="" hidden>Choose time</option>
+            <option value="09:00 AM">09:00 AM</option>
+            <option value="10:00 AM">10:00 AM</option>
+            <option value="11:00 AM">11:00 AM</option>
+            <option value="12:00 PM">12:00 PM</option>
+            <option value="01:00 PM">01:00 PM</option>
+            <option value="02:00 PM">02:00 PM</option>
+            <option value="03:00 PM">03:00 PM</option>
+            <option value="04:00 PM">04:00 PM</option>
+            <option value="05:00 PM">05:00 PM</option>
+            <option value="06:00 PM">06:00 PM</option>
+        </select>
+        </label>
+    </div>
+    
+    <div class="flex flex-wrap items-center justify-end gap-3 pt-4">
+        <button type="button" @click="closeEditModal()" class="rounded-3xl border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-slate-900/95">Cancel</button>
+        <button type="submit" class="rounded-3xl bg-gradient-to-r from-brand-emerald to-brand-teal px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:-translate-y-0.5">Save Changes</button>
+    </div>
+    </form>
+</div>
+</div>
+
+<!-- WhatsApp Custom Message Modal -->
+<div x-show="waModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm" x-transition.opacity>
+<div @click.outside="closeWaModal()" class="w-full max-w-lg rounded-[2rem] border border-emerald-500/20 bg-slate-900 p-8 shadow-2xl shadow-emerald-500/10" x-show="waModalOpen" x-transition.scale.origin.bottom>
+    <div class="mb-6 flex items-center justify-between">
+    <h3 class="text-2xl font-bold text-white flex items-center gap-2"><i data-lucide="message-square" class="text-emerald-400"></i> Customize Message</h3>
+    <button @click="closeWaModal()" class="rounded-full bg-white/5 p-2 text-slate-400 transition hover:bg-white/10 hover:text-white">
+        <i data-lucide="x" class="h-5 w-5"></i>
+    </button>
+    </div>
+    <form method="POST" :action="`/whatsapp/${waApptId}/`" @submit="setTimeout(() => closeWaModal(), 500)" class="space-y-5">
+    {% csrf_token %}
+        <div class="space-y-4">
+          <div class="rounded-2xl border border-brand-emerald/20 bg-brand-emerald/5 p-4 mb-4">
+            <p class="text-sm font-semibold text-white mb-3">Has this customer paid the consultant fee?</p>
+            <div class="flex flex-wrap gap-3">
+              <button type="button" @click="setPaidMessage()" class="rounded-xl bg-emerald-500/20 px-4 py-2 text-xs font-bold text-emerald-400 transition hover:bg-emerald-500/30">
+                <i data-lucide="check" class="inline h-3 w-3 mr-1"></i> Yes, Paid
+              </button>
+              <button type="button" @click="setUnpaidMessage()" class="rounded-xl bg-rose-500/20 px-4 py-2 text-xs font-bold text-rose-400 transition hover:bg-rose-500/30">
+                <i data-lucide="alert-circle" class="inline h-3 w-3 mr-1"></i> No, Not Paid
+              </button>
+            </div>
+          </div>
+          <label class="block text-sm text-slate-300">
+            <span class="mb-2 block font-semibold text-slate-100">WhatsApp Message</span>
+            <textarea name="custom_message" x-model="waMessage" required rows="8" class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-5 py-4 text-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"></textarea>
+          </label>
+        </div>
+    
+    <div class="flex flex-wrap items-center justify-end gap-3 pt-4">
+        <button type="button" @click="closeWaModal()" class="rounded-3xl border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-slate-900/95">Cancel</button>
+        <button type="submit" class="rounded-3xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:-translate-y-0.5 flex items-center gap-2">
+        <i data-lucide="send" class="h-4 w-4"></i> Send to WhatsApp
+        </button>
+    </div>
+    </form>
+</div>
+</div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function appointmentsShell() {
+    return {
+      editModalOpen: false,
+      editApptId: null,
+      editApptStatus: '',
+      editApptStaff: '',
+      waModalOpen: false,
+      waApptId: null,
+      waMessage: '',
+      waCustomerName: '',
+      waServiceType: '',
+      waDateStr: '',
+      waProviderName: '',
+      minDate: '',
+      init() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        this.minDate = now.toISOString().slice(0, 10);
+      },
+      openWaModal(id, customerName, serviceType, dateStr, providerName) {
+        this.waApptId = id;
+        this.waCustomerName = customerName;
+        this.waServiceType = serviceType;
+        this.waDateStr = dateStr;
+        this.waProviderName = providerName;
+        this.waMessage = `Hello ${customerName},\n\nThis is a reminder for your appointment:\nService: ${serviceType}\nDate: ${dateStr}\nProvider: ${providerName}\n\nPlease let us know if you need to reschedule!`;
+        this.waModalOpen = true;
+      },
+      setPaidMessage() {
+        this.waMessage = `Hello ${this.waCustomerName},\n\nYour booking for ${this.waServiceType} on ${this.waDateStr} has been successfully confirmed!\n\nThank you for paying the consultant fee. We look forward to seeing you.`;
+      },
+      setUnpaidMessage() {
+        this.waMessage = `Hello ${this.waCustomerName},\n\nYour booking for ${this.waServiceType} on ${this.waDateStr} cannot proceed before you pay the consultant fees.\n\nPlease pay the fees to confirm and book your appointment.`;
+      },
+      closeWaModal() {
+        this.waModalOpen = false;
+        this.waApptId = null;
+      },
+      openEditModal(id, status, staff) {
+        this.editApptId = id;
+        this.editApptStatus = status;
+        this.editApptStaff = staff;
+        this.editModalOpen = true;
+      },
+      closeEditModal() {
+        this.editModalOpen = false;
+        this.editApptId = null;
+      }
+    };
+  }
+</script>
+{% endblock %}
+

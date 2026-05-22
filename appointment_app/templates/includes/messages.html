@@ -1,0 +1,36 @@
+{% if messages %}
+<div class="toast-container" role="alert" aria-live="polite" aria-atomic="true">
+  {% for message in messages %}
+
+  {% if message.tags == 'success' %}
+  <div class="toast-auto toast-success" role="status">
+    <i class="bi bi-check-circle-fill toast-icon text-success-light"></i>
+    <span class="toast-msg">{{ message }}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()" aria-label="Dismiss">&times;</button>
+  </div>
+
+  {% elif message.tags == 'error' %}
+  <div class="toast-auto toast-error" role="alert">
+    <i class="bi bi-exclamation-circle-fill toast-icon" style="color:#f87171;"></i>
+    <span class="toast-msg">{{ message }}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()" aria-label="Dismiss">&times;</button>
+  </div>
+
+  {% elif message.tags == 'warning' %}
+  <div class="toast-auto toast-warning" role="alert">
+    <i class="bi bi-exclamation-triangle-fill toast-icon" style="color:#fbbf24;"></i>
+    <span class="toast-msg">{{ message }}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()" aria-label="Dismiss">&times;</button>
+  </div>
+
+  {% else %}
+  <div class="toast-auto toast-info" role="status">
+    <i class="bi bi-info-circle-fill toast-icon" style="color:#38bdf8;"></i>
+    <span class="toast-msg">{{ message }}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()" aria-label="Dismiss">&times;</button>
+  </div>
+  {% endif %}
+
+  {% endfor %}
+</div>
+{% endif %}

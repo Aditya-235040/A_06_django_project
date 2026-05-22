@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us - AppointOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background: #020617;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            circle at 10% 10%,
+            rgba(18, 140, 126, 0.18),
+            transparent 35%
+          ),
+          radial-gradient(
+            circle at 90% 20%,
+            rgba(37, 211, 102, 0.12),
+            transparent 30%
+          ),
+          linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 1));
+        z-index: -1;
+      }
+      .glass-panel {
+        background: rgba(15, 23, 42, 0.72);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      }
+    </style>
+  </head>
+  <body class="min-h-full text-slate-200 antialiased">
+    <main
+      class="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-10 lg:px-10">
+      <div class="mb-12 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div
+            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#128C7E] to-[#25D366] shadow-lg shadow-emerald-500/20">
+            <i data-lucide="calendar-check" class="h-6 w-6 text-white"></i>
+          </div>
+          <span class="text-xl font-bold text-white">AppointOS</span>
+        </div>
+        <a
+          href="/"
+          class="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10">
+          Back to Login
+        </a>
+      </div>
+
+      <section
+        class="grid flex-1 items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div class="space-y-8">
+          <div
+            class="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-emerald-400">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+            About Team A06
+          </div>
+
+          <div class="space-y-5">
+            <h1
+              class="max-w-3xl text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Building simpler appointment management with WhatsApp-first
+              communication.
+            </h1>
+            <p class="max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
+              AppointOS connects customers, service providers, and
+              administrators in one streamlined scheduling platform. Our goal is
+              to make booking, tracking, and appointment updates feel fast,
+              reliable, and easy for everyday businesses.
+            </p>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-3">
+            <div class="glass-panel rounded-3xl p-5">
+              <i
+                data-lucide="message-square"
+                class="mb-4 h-6 w-6 text-emerald-400"></i>
+              <h2 class="text-sm font-bold text-white">WhatsApp Alerts</h2>
+              <p class="mt-2 text-xs leading-5 text-slate-500">
+                Useful reminders and booking updates.
+              </p>
+            </div>
+            <div class="glass-panel rounded-3xl p-5">
+              <i data-lucide="users" class="mb-4 h-6 w-6 text-teal-400"></i>
+              <h2 class="text-sm font-bold text-white">Role Dashboards</h2>
+              <p class="mt-2 text-xs leading-5 text-slate-500">
+                Separate views for each user type.
+              </p>
+            </div>
+            <div class="glass-panel rounded-3xl p-5">
+              <i
+                data-lucide="calendar-days"
+                class="mb-4 h-6 w-6 text-amber-400"></i>
+              <h2 class="text-sm font-bold text-white">Easy Booking</h2>
+              <p class="mt-2 text-xs leading-5 text-slate-500">
+                Clear scheduling from request to visit.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-[2rem] p-6 lg:p-8">
+          <div class="mb-8">
+            <p
+              class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400">
+              Created By
+            </p>
+            <h2 class="mt-2 text-3xl font-bold text-white">Team Members</h2>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <a
+              href="https://www.linkedin.com/in/shreya-singh-349566321?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group block rounded-3xl border border-white/10 bg-white/5 p-4 transition hover:border-emerald-500/40 hover:bg-white/10">
+              <img
+                src="/static/images/shreyaa.jpeg"
+                alt="Shreya Kumari"
+                class="mb-4 h-48 w-full rounded-2xl object-cover" />
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-white">Shreya Kumari</h3>
+                <i
+                  data-lucide="linkedin"
+                  class="h-5 w-5 text-emerald-400 transition group-hover:scale-110"></i>
+              </div>
+              <p class="mt-1 text-sm text-slate-400">Roll: 235005</p>
+            </a>
+            <a
+              href="https://www.linkedin.com/in/aditya-gunjan-a24877273?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group block rounded-3xl border border-white/10 bg-white/5 p-4 transition hover:border-emerald-500/40 hover:bg-white/10">
+              <img
+                src="/static/images/Aditya.jpeg"
+                alt="Aditya Gunjan"
+                class="mb-4 h-48 w-full rounded-2xl object-cover" />
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-white">Aditya Gunjan</h3>
+                <i
+                  data-lucide="linkedin"
+                  class="h-5 w-5 text-emerald-400 transition group-hover:scale-110"></i>
+              </div>
+              <p class="mt-1 text-sm text-slate-400">Roll: 235040</p>
+            </a>
+            <a
+              href="https://www.linkedin.com/in/sudhanshu-rajput-98507a345?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group block rounded-3xl border border-white/10 bg-white/5 p-4 transition hover:border-emerald-500/40 hover:bg-white/10">
+              <img
+                src="/static/images/Sudhanshu.jpeg"
+                alt="Sudhanshu"
+                class="mb-4 h-48 w-full rounded-2xl object-cover" />
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-white">Sudhanshu</h3>
+                <i
+                  data-lucide="linkedin"
+                  class="h-5 w-5 text-emerald-400 transition group-hover:scale-110"></i>
+              </div>
+              <p class="mt-1 text-sm text-slate-400">Roll: 235026</p>
+            </a>
+            <a
+              href="https://www.linkedin.com/in/himanshu-kumar-386970383?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group block rounded-3xl border border-white/10 bg-white/5 p-4 transition hover:border-emerald-500/40 hover:bg-white/10">
+              <img
+                src="/static/images/himanshu.jpeg"
+                alt="Himanshu Kumar"
+                class="mb-4 h-48 w-full rounded-2xl object-cover" />
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-bold text-white">Himanshu Kumar</h3>
+                <i
+                  data-lucide="linkedin"
+                  class="h-5 w-5 text-emerald-400 transition group-hover:scale-110"></i>
+              </div>
+              <p class="mt-1 text-sm text-slate-400">Roll: 235024</p>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      lucide.createIcons()
+    </script>
+  </body>
+</html>

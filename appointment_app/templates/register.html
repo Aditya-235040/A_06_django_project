@@ -1,0 +1,231 @@
+{% load static %}
+<!-- v2: Footer Fixed -->
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - AppointOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        .glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-950 text-slate-200 antialiased overflow-hidden flex items-center justify-center p-6" x-data="{ 
+    role: 'CUSTOMER', 
+    showPassword: false, 
+    showConfirmPassword: false,
+    selectedCategory: '',
+    categoryMap: {
+        {% for cat in categories %}
+        '{{ cat.id }}': [
+            {% for sub in cat.subcategories.all %}
+            {id: '{{ sub.id }}', name: '{{ sub.name }}'},
+            {% endfor %}
+        ],
+        {% endfor %}
+    }
+}">
+    
+    <!-- Background Accents & Image -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <img src="https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png" alt="Abstract dark tech background" class="w-full h-full object-cover opacity-30" />
+        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"></div>
+        <div class="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/30 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-500/30 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-2xl shadow-emerald-500/20 mb-4">
+                <i data-lucide="calendar-check" class="text-white h-8 w-8"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Create Account</h1>
+            <p class="text-slate-500 text-sm mt-1">Join the AppointOS platform</p>
+        </div>
+
+        <div class="glass p-8 rounded-[32px] shadow-2xl overflow-y-auto max-h-[85vh]">
+            <!-- Role Selection -->
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 text-center">I want to register as a</label>
+            <div class="flex p-1 bg-slate-900/50 rounded-2xl mb-8 border border-white/5">
+                <button @click="role = 'CUSTOMER'" :class="role === 'CUSTOMER' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'" class="flex-1 py-2 rounded-xl text-[10px] font-bold transition-all duration-200">
+                    CUSTOMER
+                </button>
+                <button @click="role = 'PROVIDER'" :class="role === 'PROVIDER' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'" class="flex-1 py-2 rounded-xl text-[10px] font-bold transition-all duration-200">
+                    PROVIDER
+                </button>
+            </div>
+
+            {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)" x-transition class="p-3 rounded-xl {% if message.tags == 'success' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %} border text-xs font-medium flex items-center gap-2">
+                    <i data-lucide="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" class="h-4 w-4"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'register' %}" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="role" :value="role">
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Username</label>
+                    <input type="text" name="username" required class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="johndoe">
+                </div>
+
+                <div x-show="role === 'PROVIDER'" x-cloak x-transition class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Business Name</label>
+                        <input type="text" name="business_name" :required="role === 'PROVIDER'" class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="e.g. Acme Services">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">UPI ID</label>
+                            <input type="text" name="upi_id" class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="e.g. yourname@upi">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Booking Amount (₹)</label>
+                            <input type="number" step="0.01" name="booking_amount" class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="e.g. 500.00" value="0.00">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Category</label>
+                            <select name="category" x-model="selectedCategory" :required="role === 'PROVIDER'" class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 transition text-sm">
+                                <option value="">Select Category...</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Sub-Category</label>
+                            <select name="subcategory" :required="role === 'PROVIDER'" class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 transition text-sm">
+                                <option value="">Select Sub-Category...</option>
+                                <template x-if="categoryMap[selectedCategory]">
+                                    <template x-for="sub in categoryMap[selectedCategory]" :key="sub.id">
+                                        <option :value="sub.id" x-text="sub.name"></option>
+                                    </template>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="role === 'CUSTOMER'" x-cloak x-transition>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Phone Number</label>
+                    <input type="tel" name="phone" :required="role === 'CUSTOMER'" class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="e.g. 1234567890">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Email Address</label>
+                    <input type="email" name="email" required class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="john@example.com">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Password</label>
+                        <div class="relative group">
+                            <input :type="showPassword ? 'text' : 'password'" name="password" required class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 pl-4 pr-10 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="••••••••">
+                            <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors focus:outline-none">
+                                <i data-lucide="eye" x-show="!showPassword" class="h-4 w-4"></i>
+                                <i data-lucide="eye-off" x-show="showPassword" x-cloak class="h-4 w-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Confirm</label>
+                        <div class="relative group">
+                            <input :type="showConfirmPassword ? 'text' : 'password'" name="password_confirm" required class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 pl-4 pr-10 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="••••••••">
+                            <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors focus:outline-none">
+                                <i data-lucide="eye" x-show="!showConfirmPassword" class="h-4 w-4"></i>
+                                <i data-lucide="eye-off" x-show="showConfirmPassword" x-cloak class="h-4 w-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-4 rounded-2xl shadow-xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition duration-200 mt-4">
+                    Register as <span x-text="role.charAt(0) + role.slice(1).toLowerCase()"></span>
+                </button>
+            </form>
+
+            <div class="mt-8 text-center border-t border-white/5 pt-6">
+                <p class="text-slate-500 text-xs font-medium">
+                    Already have an account? 
+                    <a href="{% url 'login' %}" class="text-emerald-400 font-bold hover:underline">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Footer -->
+    <div class="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
+        <div class="pointer-events-auto flex items-center gap-3 text-sm text-slate-400 bg-slate-900/80 px-8 py-3 rounded-full border border-white/10 shadow-2xl backdrop-blur-md">
+            <span class="text-[10px] uppercase tracking-[0.2em] text-emerald-500 font-bold border-r border-white/10 pr-4 mr-1">Team A06</span>
+            
+            <div class="flex items-center gap-3">
+                <!-- Shreya Kumari -->
+                <div class="flex items-center gap-2 bg-white/5 pl-1 pr-3 py-1 rounded-full border border-white/5 cursor-default group hover:border-emerald-500/50 hover:bg-white/10 transition-all duration-300">
+                    <div class="h-6 w-6 rounded-full overflow-hidden border border-emerald-500 group-hover:scale-110 transition-transform">
+                        <img src="{% static 'images/shreyaa.jpeg' %}" alt="Shreya Kumari" class="h-full w-full object-cover" />
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-white font-bold text-[8px] leading-none group-hover:text-emerald-400 transition">Shreya Kumari</span>
+                        <span class="text-slate-500 text-[7px]">Roll: 235005</span>
+                    </div>
+                </div>
+                <!-- Aditya Gunjan -->
+                <div class="flex items-center gap-2 bg-white/5 pl-1 pr-3 py-1 rounded-full border border-white/5 cursor-default group hover:border-teal-500/50 hover:bg-white/10 transition-all duration-300">
+                    <div class="h-6 w-6 rounded-full overflow-hidden border border-teal-500 group-hover:scale-110 transition-transform">
+                        <img src="{% static 'images/Aditya.jpeg' %}" alt="Aditya Gunjan" class="h-full w-full object-cover" />
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-white font-bold text-[8px] leading-none group-hover:text-teal-400 transition">Aditya Gunjan</span>
+                        <span class="text-slate-500 text-[7px]">Roll: 235040</span>
+                    </div>
+                </div>
+                <!-- Sudhanshu -->
+                <div class="flex items-center gap-2 bg-white/5 pl-1 pr-3 py-1 rounded-full border border-white/5 cursor-default group hover:border-emerald-500/50 hover:bg-white/10 transition-all duration-300">
+                    <div class="h-6 w-6 rounded-full overflow-hidden border border-emerald-500 group-hover:scale-110 transition-transform">
+                        <img src="{% static 'images/Sudhanshu.jpeg' %}" alt="Sudhanshu" class="h-full w-full object-cover" />
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-white font-bold text-[8px] leading-none group-hover:text-emerald-400 transition">Sudhanshu</span>
+                        <span class="text-slate-500 text-[7px]">Roll: 235026</span>
+                    </div>
+                </div>
+                <!-- Himanshu Kumar -->
+                <div class="flex items-center gap-2 bg-white/5 pl-1 pr-3 py-1 rounded-full border border-white/5 cursor-default group hover:border-amber-500/50 hover:bg-white/10 transition-all duration-300">
+                    <div class="h-6 w-6 rounded-full overflow-hidden border border-amber-500 group-hover:scale-110 transition-transform">
+                        <img src="{% static 'images/himanshu.jpeg' %}" alt="Himanshu Kumar" class="h-full w-full object-cover" />
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-white font-bold text-[8px] leading-none group-hover:text-amber-400 transition">Himanshu Kumar</span>
+                        <span class="text-slate-500 text-[7px]">Roll: 235024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

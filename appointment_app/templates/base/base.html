@@ -1,0 +1,280 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WhatsApp Appointment OS{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (via CDN for stability in this step) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            emerald: '#128C7E', /* WhatsApp Teal Green */
+                            teal: '#25D366', /* WhatsApp Light Green */
+                            dark: '#075E54', /* WhatsApp Dark Green */
+                        }
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        [x-cloak] { display: none !important; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #020617;
+            position: relative;
+        }
+        
+        /* Premium Animated Background */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+            z-index: -1;
+            animation: pulse-bg 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-bg {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Micro-animations */
+        .hover-lift {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="h-full text-slate-200 antialiased overflow-x-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 glass-panel border-r border-white/5 hidden lg:block">
+        <div class="flex h-full flex-col p-6">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-emerald to-brand-teal flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <i data-lucide="calendar-check" class="text-white h-6 w-6"></i>
+                </div>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">AppointOS</h1>
+            </div>
+
+            <nav class="space-y-2 flex-1">
+                {% if user.role == 'ADMIN' %}
+                    <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:bg-white/5 {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-white/10 text-white shadow-sm{% else %}text-slate-400{% endif %}">
+                        <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
+                        <span class="font-medium text-sm">Admin Panel</span>
+                    </a>
+                    <a href="{% url 'appointments_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:bg-white/5 {% if request.resolver_match.url_name == 'appointments_list' %}bg-white/10 text-white shadow-sm{% else %}text-slate-400{% endif %}">
+                        <i data-lucide="calendar" class="h-5 w-5"></i>
+                        <span class="font-medium text-sm">All Appointments</span>
+                    </a>
+                {% elif user.role == 'PROVIDER' %}
+                    <a href="{% url 'provider_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:bg-white/5 {% if request.resolver_match.url_name == 'provider_dashboard' %}bg-white/10 text-white shadow-sm{% else %}text-slate-400{% endif %}">
+                        <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
+                        <span class="font-medium text-sm">Dashboard</span>
+                    </a>
+                    <a href="{% url 'appointments_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:bg-white/5 {% if request.resolver_match.url_name == 'appointments_list' %}bg-white/10 text-white shadow-sm{% else %}text-slate-400{% endif %}">
+                        <i data-lucide="calendar" class="h-5 w-5"></i>
+                        <span class="font-medium text-sm">Appointments</span>
+                    </a>
+                    <a href="{% url 'staff_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:bg-white/5 {% if request.resolver_match.url_name == 'staff_list' %}bg-white/10 text-white shadow-sm{% else %}text-slate-400{% endif %}">
+                        <i data-lucide="users" class="h-5 w-5"></i>
+                        <span class="font-medium text-sm">My Staff</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'customer_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:bg-white/5 {% if request.resolver_match.url_name == 'customer_dashboard' %}bg-white/10 text-white shadow-sm{% else %}text-slate-400{% endif %}">
+                        <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
+                        <span class="font-medium text-sm">My Bookings</span>
+                    </a>
+                {% endif %}
+                <a href="{% url 'about_us' %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition hover:bg-white/5 {% if request.resolver_match.url_name == 'about_us' %}bg-white/10 text-white shadow-sm{% else %}text-slate-400{% endif %}">
+                    <i data-lucide="info" class="h-5 w-5"></i>
+                    <span class="font-medium text-sm">About Us</span>
+                </a>
+            </nav>
+
+            <div class="mt-auto pt-6 border-t border-white/5">
+                <div class="flex items-center gap-3 px-2 mb-4">
+                    <div class="h-8 w-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-xs font-bold text-slate-300 uppercase">
+                        {{ user.username|slice:":1" }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-white truncate">{{ user.username }}</p>
+                        <p class="text-xs text-slate-500 truncate">{{ user.email }}</p>
+                    </div>
+                </div>
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-rose-400 hover:bg-rose-500/10 transition">
+                    <i data-lucide="log-out" class="h-5 w-5"></i>
+                    <span class="font-medium text-sm">Logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="lg:pl-64 min-h-screen flex flex-col">
+        <!-- Top Header -->
+        <header class="h-16 glass-panel sticky top-0 z-30 px-6 flex items-center justify-between border-b border-white/5 lg:bg-slate-950/50">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden text-slate-400">
+                    <i data-lucide="menu" class="h-6 w-6"></i>
+                </button>
+                <div class="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-500 uppercase tracking-widest">
+                    <span>Main</span>
+                    <i data-lucide="chevron-right" class="h-3 w-3"></i>
+                    <span class="text-slate-300">{% block breadcrumb %}{{ request.resolver_match.url_name|title }}{% endblock %}</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <i data-lucide="bell" class="h-5 w-5 text-slate-400"></i>
+                    {% if pending_count > 0 %}
+                    <span class="absolute -top-1 -right-1 h-2 w-2 bg-rose-500 rounded-full"></span>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content -->
+        <div class="flex-1 p-6 lg:p-10 max-w-7xl mx-auto w-full pb-24">
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-2xl border flex items-center justify-between {% if message.tags == 'success' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" class="h-5 w-5"></i>
+                                <span class="text-sm font-medium">{{ message }}</span>
+                            </div>
+                            <button @click="$el.parentElement.remove()" class="opacity-50 hover:opacity-100"><i data-lucide="x" class="h-4 w-4"></i></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Global Footer -->
+        <footer class="mt-auto py-6 border-t border-white/10 bg-slate-900/80 backdrop-blur-md z-50 relative">
+            <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-3">
+                    <span class="text-xs uppercase tracking-[0.2em] text-brand-emerald font-bold border-r border-white/10 pr-4 mr-1">Created By Team A06</span>
+                    
+                    <div class="flex flex-wrap items-center gap-4">
+                        <!-- Shreya Kumari -->
+                        <div class="flex items-center gap-3 bg-white/5 pl-1 pr-4 py-1.5 rounded-full border border-white/10 hover:border-emerald-500/50 hover:bg-white/10 transition-all duration-300 cursor-default shadow-sm group">
+                            <div class="h-9 w-9 rounded-full overflow-hidden border-2 border-emerald-500 group-hover:scale-110 transition-transform">
+                                <img src="{% static 'images/shreyaa.jpeg' %}" alt="Shreya Kumari" class="h-full w-full object-cover" />
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-white font-bold text-xs leading-none group-hover:text-emerald-400 transition">Shreya Kumari</span>
+                                <span class="text-slate-500 text-[10px] mt-0.5">Roll: <span class="text-slate-300">235005</span></span>
+                            </div>
+                        </div>
+                        <!-- Aditya Gunjan -->
+                        <div class="flex items-center gap-3 bg-white/5 pl-1 pr-4 py-1.5 rounded-full border border-white/10 hover:border-teal-500/50 hover:bg-white/10 transition-all duration-300 cursor-default shadow-sm group">
+                            <div class="h-9 w-9 rounded-full overflow-hidden border-2 border-teal-500 group-hover:scale-110 transition-transform">
+                                <img src="{% static 'images/Aditya.jpeg' %}" alt="Aditya Gunjan" class="h-full w-full object-cover" />
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-white font-bold text-xs leading-none group-hover:text-teal-400 transition">Aditya Gunjan</span>
+                                <span class="text-slate-500 text-[10px] mt-0.5">Roll: <span class="text-slate-300">235040</span></span>
+                            </div>
+                        </div>
+                        <!-- Sudhanshu -->
+                        <div class="flex items-center gap-3 bg-white/5 pl-1 pr-4 py-1.5 rounded-full border border-white/10 hover:border-emerald-500/50 hover:bg-white/10 transition-all duration-300 cursor-default shadow-sm group">
+                            <div class="h-9 w-9 rounded-full overflow-hidden border-2 border-emerald-500 group-hover:scale-110 transition-transform">
+                                <img src="{% static 'images/Sudhanshu.jpeg' %}" alt="Sudhanshu" class="h-full w-full object-cover" />
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-white font-bold text-xs leading-none group-hover:text-emerald-400 transition">Sudhanshu</span>
+                                <span class="text-slate-500 text-[10px] mt-0.5">Roll: <span class="text-slate-300">235026</span></span>
+                            </div>
+                        </div>
+                        <!-- Himanshu Kumar -->
+                        <div class="flex items-center gap-3 bg-white/5 pl-1 pr-4 py-1.5 rounded-full border border-white/10 hover:border-amber-500/50 hover:bg-white/10 transition-all duration-300 cursor-default shadow-sm group">
+                            <div class="h-9 w-9 rounded-full overflow-hidden border-2 border-amber-500 group-hover:scale-110 transition-transform">
+                                <img src="{% static 'images/himanshu.jpeg' %}" alt="Himanshu Kumar" class="h-full w-full object-cover" />
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-white font-bold text-xs leading-none group-hover:text-amber-400 transition">Himanshu Kumar</span>
+                                <span class="text-slate-500 text-[10px] mt-0.5">Roll: <span class="text-slate-300">235024</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 text-slate-500 hidden lg:flex">
+                    <span class="text-[10px] uppercase tracking-widest text-slate-600 font-bold">WhatsApp Appointment OS</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
