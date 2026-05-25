@@ -89,6 +89,13 @@
                                 <p class="text-sm text-slate-200 font-medium">{{ appt.staff.name }}</p>
                             </div>
                         </div>
+                        <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:bg-white/10 transition">
+                            <i data-lucide="map-pin" class="h-5 w-5 text-brand-teal"></i>
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Location</p>
+                                <p class="text-sm text-slate-200 font-medium">{{ appt.provider.address|default:"Location not set" }}</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mt-auto flex items-center gap-3">
@@ -267,7 +274,7 @@
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Choose Staff</label>
                         <div class="relative">
-                            <select name="staff" required class="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white focus:border-brand-emerald focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 transition">
+                            <select name="staff" required @change="updateSelectedProvider($event)" class="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white focus:border-brand-emerald focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 transition">
                                 <option value="" hidden>Select Provider</option>
                                 {% regroup staffs by provider.business_name as provider_list %}
                                 {% for provider in provider_list %}
@@ -277,7 +284,7 @@
                                     <optgroup label="Independent Staff" class="bg-slate-900 text-brand-emerald font-bold">
                                     {% endif %}
                                         {% for s in provider.list %}
-                                        <option value="{{ s.pk }}" class="bg-slate-900 text-slate-200" data-upi-id="{{ s.provider.upi_id }}" data-amount="{{ s.provider.booking_amount }}" data-business-name="{{ s.provider.business_name|escapejs }}">{{ s.position }} — {{ s.name }}</option>
+                                        <option value="{{ s.pk }}" class="bg-slate-900 text-slate-200" data-upi-id="{{ s.provider.upi_id }}" data-amount="{{ s.provider.booking_amount }}" data-business-name="{{ s.provider.business_name|escapejs }}" data-provider-location="{{ s.provider.address|default:'Location not set' }}">{{ s.position }} — {{ s.name }}</option>
                                         {% endfor %}
                                     </optgroup>
                                 {% endfor %}
@@ -294,7 +301,7 @@
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Time Slot</label>
                     <div class="relative">
-                        <select name="time_slot" required class="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white focus:border-brand-emerald focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 transition">
+                        <select name="time_slot" required x-model="selectedTime" class="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white focus:border-brand-emerald focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 transition">
                             <option value="" disabled selected class="bg-slate-900 text-slate-400">Select Time Slot</option>
                             <template x-for="slot in availableTimeSlots()" :key="slot.value">
                                 <option :value="slot.value" class="bg-slate-900 text-slate-200" x-text="slot.label"></option>
@@ -307,6 +314,39 @@
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Service Type</label>
                     <input name="service_type" type="text" required class="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-slate-600 focus:border-brand-emerald focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 transition" placeholder="e.g. Consultation, Haircut, etc." />
+                </div>
+
+                <div x-show="selectedProviderName || selectedDate || selectedTime" x-cloak class="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="store" class="mt-0.5 h-4 w-4 text-brand-emerald"></i>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Provider</p>
+                            <p class="font-semibold text-white" x-text="selectedProviderName || 'Select provider'"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="map-pin" class="mt-0.5 h-4 w-4 text-brand-teal"></i>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Location</p>
+                            <p class="text-slate-200" x-text="selectedProviderLocation || 'Location not set'"></p>
+                        </div>
+                    </div>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="calendar" class="mt-0.5 h-4 w-4 text-brand-emerald"></i>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Date</p>
+                                <p class="font-semibold text-white" x-text="selectedDate || 'Select date'"></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="clock" class="mt-0.5 h-4 w-4 text-brand-emerald"></i>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Time</p>
+                                <p class="font-semibold text-white" x-text="selectedTime || 'Select time'"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="pt-6 flex flex-col sm:flex-row items-center gap-4">
@@ -334,6 +374,9 @@
             bookingForm: null,
             minDate: '',
             selectedDate: '',
+            selectedTime: '',
+            selectedProviderName: '',
+            selectedProviderLocation: '',
             init() {
                 this.minDate = this.toLocalDateString(new Date());
             },
@@ -368,6 +411,15 @@
                 this.showModal = false;
                 document.body.style.overflow = 'auto';
                 setTimeout(() => this.paymentStep = false, 300);
+                this.selectedDate = '';
+                this.selectedProviderName = '';
+                this.selectedProviderLocation = '';
+                this.selectedTime = '';
+            },
+            updateSelectedProvider(e) {
+                const selectedOption = e.target.options[e.target.selectedIndex];
+                this.selectedProviderName = selectedOption.getAttribute('data-business-name') || '';
+                this.selectedProviderLocation = selectedOption.getAttribute('data-provider-location') || 'Location not set';
             },
             handleBookingSubmit(e) {
                 const form = e.target;
@@ -377,6 +429,8 @@
                 const upiId = selectedOption.getAttribute('data-upi-id');
                 const amount = selectedOption.getAttribute('data-amount');
                 const businessName = selectedOption.getAttribute('data-business-name') || 'Provider';
+                this.selectedProviderName = businessName;
+                this.selectedProviderLocation = selectedOption.getAttribute('data-provider-location') || 'Location not set';
                 
                 if (upiId && amount && parseFloat(amount) > 0) {
                     this.bookingAmount = amount;
@@ -396,4 +450,3 @@
     }
 </script>
 {% endblock %}
-

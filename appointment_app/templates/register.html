@@ -91,6 +91,11 @@
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Business Name</label>
                         <input type="text" name="business_name" :required="role === 'PROVIDER'" class="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="e.g. Acme Services">
                     </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Location</label>
+                        <textarea name="address" rows="3" class="w-full resize-none bg-slate-900/50 border border-white/5 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition text-sm" placeholder="Enter shop, clinic, office, or service location"></textarea>
+                    </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>

@@ -89,11 +89,13 @@
                     <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
                     <i data-lucide="check-circle" class="h-4 w-4"></i>Sent
                     </span>
-                    {% else %}
-                    <button @click="openWaModal('{{ appointment.pk }}', '{{ appointment.customer.name|escapejs }}', '{{ appointment.service_type|escapejs }}', '{{ appointment.appointment_date|date:'Y-m-d H:i' }}', '{{ appointment.provider.business_name|default:'Us'|escapejs }}')" class="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-4 py-2 text-xs font-semibold text-slate-100 transition hover:bg-slate-900/95">
-                    <i data-lucide="message-circle" class="h-4 w-4"></i>Send
-                    </button>
                     {% endif %}
+                    <form method="POST" action="{% url 'send_whatsapp' appointment.pk %}" class="inline-flex">
+                    {% csrf_token %}
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-4 py-2 text-xs font-semibold text-slate-100 transition hover:bg-slate-900/95">
+                    <i data-lucide="message-circle" class="h-4 w-4"></i>{% if appointment.whatsapp_sent %}Resend{% else %}Send{% endif %}
+                    </button>
+                    </form>
                     
                     {% if user.role != 'CUSTOMER' %}
                     <button @click="openEditModal('{{ appointment.pk }}', '{{ appointment.status }}', '{{ appointment.staff.pk }}')" class="inline-flex items-center gap-2 rounded-full border border-brand-emerald/30 bg-brand-emerald/10 px-4 py-2 text-xs font-semibold text-brand-emerald transition hover:bg-brand-emerald hover:text-white">
@@ -196,7 +198,7 @@
         <div class="grid gap-4 sm:grid-cols-2">
           <label class="block text-sm text-slate-300">
             <span class="mb-2 block font-semibold text-slate-100">Staff / Service</span>
-            <select name="staff" required class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20">
+            <select name="staff" required @change="updateSelectedProvider($event)" class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20">
               <option value="" hidden>Choose service / staff</option>
               {% regroup staffs by provider.business_name as provider_list %}
               {% for provider in provider_list %}
@@ -206,7 +208,7 @@
                   <optgroup label="Independent Staff">
                   {% endif %}
                       {% for s in provider.list %}
-                      <option value="{{ s.pk }}" data-upi-id="{{ s.provider.upi_id }}" data-amount="{{ s.provider.booking_amount }}" data-business-name="{{ s.provider.business_name|escapejs }}">{{ s.position }} — {{ s.name }}</option>
+                      <option value="{{ s.pk }}" data-upi-id="{{ s.provider.upi_id }}" data-amount="{{ s.provider.booking_amount }}" data-business-name="{{ s.provider.business_name|escapejs }}" data-provider-location="{{ s.provider.address|default:'Location not set' }}">{{ s.position }} — {{ s.name }}</option>
                       {% endfor %}
                   </optgroup>
               {% endfor %}
@@ -214,13 +216,13 @@
           </label>
           <label class="block text-sm text-slate-300">
             <span class="mb-2 block font-semibold text-slate-100">Date</span>
-            <input name="appointment_date" type="date" :min="minDate" required class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20" />
+            <input name="appointment_date" type="date" x-model="selectedDate" :min="minDate" required class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20" />
           </label>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
           <label class="block text-sm text-slate-300">
             <span class="mb-2 block font-semibold text-slate-100">Time Slot</span>
-            <select name="time_slot" required class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20">
+            <select name="time_slot" required x-model="selectedTime" class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20">
                 <option value="09:00 AM">09:00 AM</option>
                 <option value="10:00 AM">10:00 AM</option>
                 <option value="11:00 AM">11:00 AM</option>
@@ -237,6 +239,40 @@
           <span class="mb-2 block font-semibold text-slate-100">Service type</span>
           <input name="service_type" type="text" required class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20" placeholder="e.g. Consultation, Styling" />
         </label>
+        {% if user.role == 'CUSTOMER' %}
+        <div x-show="selectedProviderName || selectedDate || selectedTime" x-cloak class="grid gap-3 rounded-3xl border border-white/10 bg-slate-900/80 p-4 text-sm">
+          <div class="flex items-start gap-3">
+            <i data-lucide="store" class="mt-0.5 h-4 w-4 text-brand-emerald"></i>
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Provider</p>
+              <p class="font-semibold text-white" x-text="selectedProviderName || 'Select provider'"></p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <i data-lucide="map-pin" class="mt-0.5 h-4 w-4 text-brand-teal"></i>
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Location</p>
+              <p class="text-slate-200" x-text="selectedProviderLocation || 'Location not set'"></p>
+            </div>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="flex items-start gap-3">
+              <i data-lucide="calendar" class="mt-0.5 h-4 w-4 text-brand-emerald"></i>
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Date</p>
+                <p class="font-semibold text-white" x-text="selectedDate || 'Select date'"></p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <i data-lucide="clock" class="mt-0.5 h-4 w-4 text-brand-emerald"></i>
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Time</p>
+                <p class="font-semibold text-white" x-text="selectedTime || 'Select time'"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
         <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
           <button type="button" @click="closeModal()" class="rounded-3xl border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-slate-900/95">Cancel</button>
           <button type="submit" class="rounded-3xl bg-gradient-to-r from-brand-emerald to-brand-teal px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:-translate-y-0.5">Schedule</button>
@@ -261,6 +297,11 @@
           <label class="block text-sm text-slate-300">
             <span class="mb-2 block font-semibold text-slate-100">Status</span>
             <select name="status" x-model="editApptStatus" required class="w-full rounded-3xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20">
+              {% if user.role == 'PROVIDER' %}
+              <option value="rejected">Rejected</option>
+              <option value="rescheduled">Rescheduled</option>
+              <option value="confirmed">Confirmed</option>
+              {% else %}
               <option value="pending">Pending</option>
               <option value="accepted">Accepted</option>
               <option value="rejected">Rejected</option>
@@ -268,6 +309,7 @@
               <option value="confirmed">Confirmed</option>
               <option value="done">Done</option>
               <option value="cancelled">Cancelled</option>
+              {% endif %}
             </select>
           </label>
 
@@ -376,6 +418,10 @@
       editApptStatus: '',
       editApptStaff: '',
       search: '',
+      selectedDate: '',
+      selectedTime: '',
+      selectedProviderName: '',
+      selectedProviderLocation: '',
       waModalOpen: false,
       waApptId: null,
       waMessage: '',
@@ -414,6 +460,15 @@
       closeModal() {
         this.showModal = false;
         setTimeout(() => this.paymentStep = false, 300);
+        this.selectedDate = '';
+        this.selectedTime = '';
+        this.selectedProviderName = '';
+        this.selectedProviderLocation = '';
+      },
+      updateSelectedProvider(e) {
+        const selectedOption = e.target.options[e.target.selectedIndex];
+        this.selectedProviderName = selectedOption.getAttribute('data-business-name') || '';
+        this.selectedProviderLocation = selectedOption.getAttribute('data-provider-location') || 'Location not set';
       },
       handleBookingSubmit(e) {
         const form = e.target;
@@ -423,6 +478,8 @@
         const upiId = selectedOption.getAttribute('data-upi-id');
         const amount = selectedOption.getAttribute('data-amount');
         const businessName = selectedOption.getAttribute('data-business-name') || 'Provider';
+        this.selectedProviderName = businessName;
+        this.selectedProviderLocation = selectedOption.getAttribute('data-provider-location') || 'Location not set';
         
         if (upiId && amount && parseFloat(amount) > 0) {
             this.bookingAmount = amount;

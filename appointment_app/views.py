@@ -85,6 +85,7 @@ def register_view(request):
         urole = request.POST.get('role', 'CUSTOMER')
         ubusiness = request.POST.get('business_name', '').strip()
         uphone = request.POST.get('phone', '').strip()
+        uaddress = request.POST.get('address', '').strip()
         ucategory_id = request.POST.get('category')
         usubcategory_id = request.POST.get('subcategory')
 
@@ -123,6 +124,7 @@ def register_view(request):
                 provider = ProviderProfile.objects.create(
                     user=user, 
                     business_name=business_name,
+                    address=uaddress,
                     upi_id=request.POST.get('upi_id'),
                     booking_amount=booking_amount
                 )
@@ -261,6 +263,29 @@ def reset_password(request):
                 messages.error(request, "User not found.")
                 
     return render(request, 'forgot_password.html', {'step': 'reset'})
+
+
+def send_whatsapp_and_mark_sent(appointment_id, phone, text):
+    sent = send_whatsapp_message(phone, text)
+    appointment = Appointment.objects.filter(pk=appointment_id).first()
+    if not appointment:
+        return False
+
+    if sent:
+        appointment.whatsapp_sent = True
+        appointment.save(update_fields=['whatsapp_sent', 'updated_at'])
+        Notification.objects.create(
+            appointment=appointment,
+            message=f"Automated notification sent for {appointment.service_type} ({appointment.status})",
+            status='sent'
+        )
+    else:
+        Notification.objects.create(
+            appointment=appointment,
+            message=f"Failed to send WhatsApp notification for {appointment.service_type} ({appointment.status})",
+            status='failed'
+        )
+    return sent
 
 
 # ============================
@@ -478,6 +503,10 @@ def update_appointment(request, pk):
         new_date = request.POST.get('appointment_date')
         new_time = request.POST.get('time_slot')
         
+        if request.user.role == 'PROVIDER' and status not in ['confirmed', 'rejected', 'rescheduled']:
+            messages.error(request, "Providers can only confirm, reject, or reschedule appointments.")
+            return redirect(request.META.get('HTTP_REFERER', 'appointments_list'))
+        
         if status in dict(Appointment.STATUS_CHOICES):
             appointment.status = status
             
@@ -528,36 +557,19 @@ def send_whatsapp(request, pk):
         messages.error(request, "Access denied.")
         return redirect('provider_dashboard')
         
-    if appointment.whatsapp_sent:
-        messages.error(request, "Message already sent. You can only send the WhatsApp message once.")
-        return redirect(request.META.get('HTTP_REFERER', 'provider_dashboard'))
-    
-    appointment.whatsapp_sent = True
-    appointment.save()
-    
-    # Send automatically using pywhatkit (opens browser on host)
-    phone = ''.join(filter(str.isdigit, str(appointment.customer.phone)))
-    # Add country code if missing (assuming India +91 for now, or just leave as is if they provide it)
-    if not phone.startswith('+'):
-        # Usually pywhatkit requires a country code. We'll prepend +91 for safety or assume the user inputs it.
-        if len(phone) == 10:
-            phone = f"+91{phone}"
-        else:
-            phone = f"+{phone}"
-            
+    phone = appointment.customer.phone
     default_text = f"Hello {appointment.customer.name},\nThis is a reminder for your appointment:\nService: {appointment.service_type}\nDate: {appointment.appointment_date.strftime('%Y-%m-%d')} at {appointment.time_slot}\nStatus: {appointment.status}\nProvider: {appointment.provider.business_name if appointment.provider else 'Us'}\nPlease let us know if you need to reschedule!"
     text = request.POST.get('custom_message', default_text)
     
     try:
-        threading.Thread(target=send_whatsapp_message, args=(phone, text)).start()
-        messages.success(request, "WhatsApp message is being sent automatically in the background without needing to press enter!")
+        appointment.whatsapp_sent = False
+        appointment.save(update_fields=['whatsapp_sent', 'updated_at'])
+        sent = send_whatsapp_and_mark_sent(appointment.pk, phone, text)
+        if sent:
+            messages.success(request, f"Message sent to {appointment.customer.name} on WhatsApp number {appointment.customer.phone}.")
+        else:
+            messages.error(request, "WhatsApp message could not be sent. Check the customer's phone number and make sure WhatsApp Web is logged in.")
     except Exception as e:
         messages.error(request, f"Failed to send WhatsApp: {str(e)}")
-        
-    Notification.objects.create(
-        appointment=appointment,
-        message=f"Automated notification sent for {appointment.service_type} ({appointment.status})",
-        status='sent'
-    )
     
     return redirect(request.META.get('HTTP_REFERER', 'provider_dashboard'))
